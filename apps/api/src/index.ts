@@ -1,16 +1,22 @@
-// Import the express in typescript file
 import express from "express";
+import { PrismaClient } from "@prisma/client";
+import { configDotenv } from "dotenv";
+import authRoutes from "./routes/auth.route";
+
+configDotenv();
 
 // Initialize the express engine
 const app: express.Application = express();
+const prisma: PrismaClient = new PrismaClient();
 
 // Take a port 3000 for running server.
 const port: number = 3000;
 
-// Handling '/' Request
-app.get("/", (_req, _res) => {
-  _res.send("TypeScript With Express");
-});
+//middlewares
+app.use(express.json());
+
+//routes
+app.use("/api/v1", authRoutes);
 
 // Server setup
 app.listen(port, () => {
