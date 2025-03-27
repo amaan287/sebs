@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum VenueType {
+  CAFE
+  BAR
+  CLUB
+  ROOFTOP
+}
+
+enum MusicGenre {
+  TECHNO
+  HOUSE
+  JAZZ
+  HIPHOP
+  ROCK
+  POP
+  CLASSICAL
+  OTHER
+}
+
+model User {
+  id           String  @id @default(uuid())
+  email        String  @unique
+  firstName    String
+  lastName     String
+  password     String
+  admin        Boolean @default(false)
+  premium_user Boolean @default(false)
+
+  // Relationships
+  ownedVenues Venue[]    @relation("VenueOwner")
+  favorites   Favorite[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Venue {
+  id        String    @id @default(uuid())
+  name      String
+  type      VenueType
+  address   String
+  latitude  Float
+  longitude Float
+  owner     User      @relation("VenueOwner", fields: [ownerId], references: [id])
+  ownerId   String
+
+  events      Event[]
+  favoritedBy Favorite[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Many-to-Many Join Table for Favorites
+model Favorite {
+  id      String @id @default(uuid())
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
+  venue   Venue  @relation(fields: [venueId], references: [id])
+  venueId String
+
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id      String     @id @default(uuid())
+  name    String
+  date    DateTime
+  genre   MusicGenre
+  venue   Venue      @relation(fields: [venueId], references: [id])
+  venueId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
