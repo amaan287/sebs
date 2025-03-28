@@ -63,11 +63,12 @@ export async function signin(req: any, res: any) {
     });
     if (!user) {
       console.error("user not found");
-      return res.status(400).json({
+      res.status(400).json({
         data: {
           message: "signup failed user not found",
         },
       });
+      return;
     }
     const isValid = compareSync(parsedData.data.password, user.password);
     if (!isValid) {
@@ -84,5 +85,15 @@ export async function signin(req: any, res: any) {
     const token = jwt.sign({ id: user.id }, JWT_SECRET, {
       expiresIn: "30d",
     });
-  } catch (e) {}
+    res.status(200).json({
+      data: {
+        message: "signed in successfully",
+        user: user,
+        token: token,
+      },
+    });
+  } catch (e) {
+    res.json({ message: "error " });
+    console.log(e);
+  }
 }

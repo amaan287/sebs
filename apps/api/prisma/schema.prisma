@@ -1,5 +1,7 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+  extensions      = [postgis]
 }
 
 datasource db {
@@ -26,14 +28,21 @@ enum MusicGenre {
 }
 
 model User {
-  id           String  @id @default(uuid())
-  email        String  @unique
-  firstName    String
-  lastName     String
-  password     String
+  id        String @id @default(uuid())
+  email     String @unique
+  firstName String
+  lastName  String
+  password  String
+
   admin        Boolean @default(false)
   premium_user Boolean @default(false)
 
+  phone          String?
+  profilePicture String?
+
+  location    String?
+  latitude    String?
+  longitude   String?
   // Relationships
   ownedVenues Venue[]    @relation("VenueOwner")
   favorites   Favorite[]
@@ -43,20 +52,33 @@ model User {
 }
 
 model Venue {
-  id        String    @id @default(uuid())
-  name      String
-  type      VenueType
-  address   String
-  latitude  Float
-  longitude Float
-  owner     User      @relation("VenueOwner", fields: [ownerId], references: [id])
+  id   String    @id @default(uuid())
+  name String
+  type VenueType
+
+  MapLink    String
+  city       String
+  country    String
+  postalCode String?
+
+  description String?
+  phoneNumber String?
+  websiteUrl  String?
+
+  location  String?
+  latitude  Float?
+  longitude Float?
+
+  openingTime DateTime?
+  closingTime DateTime?
+  isActive    Boolean   @default(true)
+
+  owner     User       @relation("VenueOwner", fields: [ownerId], references: [id])
   ownerId   String
-
-  events      Event[]
-  favoritedBy Favorite[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  Favorite  Favorite[]
+  Event     Event[]
 }
 
 // Many-to-Many Join Table for Favorites
@@ -71,13 +93,13 @@ model Favorite {
 }
 
 model Event {
-  id      String     @id @default(uuid())
-  name    String
-  date    DateTime
-  genre   MusicGenre
-  venue   Venue      @relation(fields: [venueId], references: [id])
-  venueId String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String     @id @default(uuid())
+  name      String
+  date      DateTime
+  genre     MusicGenre
+  venue     Venue      @relation(fields: [venueId], references: [id])
+  venueId   String
+  Performer String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
