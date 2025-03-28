@@ -56,7 +56,6 @@ model Venue {
   name String
   type VenueType
 
-  MapLink    String
   city       String
   country    String
   postalCode String?
@@ -66,8 +65,10 @@ model Venue {
   websiteUrl  String?
 
   location  String?
+  address   String?
   latitude  Float?
   longitude Float?
+  mapLink   String?
 
   openingTime DateTime?
   closingTime DateTime?
