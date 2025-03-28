@@ -1,15 +1,18 @@
+import LocationService from "../LocationService/HelperService";
 import { postVenueSchema } from "../types";
 import { PrismaClient } from "@prisma/client";
+import { RequestHandler } from "express";
 const prisma: PrismaClient = new PrismaClient();
-export async function postVenue(req: any, res: any) {
+export const postVenue:RequestHandler = async (req, res) => {
   const parsedData = postVenueSchema.safeParse(req.body);
   if (!parsedData.success) {
     console.log("error", parsedData.error);
-    return res.status(400).json({
+    res.status(400).json({
       data: {
         message: "Validation failed",
       },
     });
+    return;
   }
 
   const owner = await prisma.user.findUnique({
@@ -17,44 +20,45 @@ export async function postVenue(req: any, res: any) {
   });
 
   if (!owner) {
-    return res.status(404).json({
+    res.status(404).json({
       data: {
         message: "Owner not found",
       },
     });
+    return;
   }
 
   if (!owner.admin) {
-    return res.status(400).json({
+    res.status(400).json({
       data: {
         message: "Account type is not admin, please create an owner's account",
       },
     });
+    return;
   }
 
-  const venue = await prisma.$executeRaw`
-    INSERT INTO "Venue" (id, name, type, address, location, ownerId, createdAt, updatedAt)
-    VALUES (
-      gen_random_uuid(),
-      ${parsedData.data.name},
-      ${parsedData.data.type},
-      ${parsedData.data.address},
-      ST_SetSRID(ST_MakePoint(${parsedData.data.longitude}, ${parsedData.data.latitude}), 4326),
-      ${owner.id},
-      NOW(),
-      NOW()
-    )
-    RETURNING *;
-  `;
+  const locationService = new LocationService(prisma);
+  const newVenue = await locationService.createVenueWithLocation({
+    name: parsedData.data.name,
+    type: parsedData.data.type,
+    address: parsedData.data.address,
+    latitude: parsedData.data.latitude,
+    longitude: parsedData.data.longitude,
+    city: parsedData.data.city,
+    country: parsedData.data.country,
+    owner: {
+      connect: { id: parsedData.data.ownerId }
+    }
+  });
 
-  return res.status(200).json({
+  res.status(200).json({
     data: {
       message: "Venue created successfully",
-      venue,
+      newVenue,
     },
   });
 }
-export async function getAllVenue(req: any, res: any) {
+export const  getAllVenue:RequestHandler = async (req, res) => {
   try {
     const venue = await prisma.venue.findMany({
       include: {
@@ -66,7 +70,7 @@ export async function getAllVenue(req: any, res: any) {
             email: true,
             admin: true,
           },
-        }, // Fetch owner details
+        },
       },
     });
     if (!venue) {
@@ -75,11 +79,19 @@ export async function getAllVenue(req: any, res: any) {
           message: "no venues",
         },
       });
+      return;
     }
     res.status(200).json({
       data: {
         venue: venue,
       },
     });
-  } catch (e) {}
+  } catch (e) {
+    res.status(500).json({
+      data: {
+        message: "Internal server error",
+      },
+    });
+    return;
+  }
 }

@@ -27,6 +27,8 @@ export const postVenueSchema = z.object({
   latitude: z.number(),
   longitude: z.number(),
   ownerId: z.string(),
+  city: z.string(),
+  country: z.string(),
 });
 
 export const venue = z.object({
@@ -82,4 +84,9 @@ export const postEventSchema = z.object({
   ]),
   venue: venue,
   venueId: z.string(),
+});
+
+export const findVenueSchema = z.object({
+  latitude: z.number(),
+  longitude: z.number(),
 });

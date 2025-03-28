@@ -7,12 +7,10 @@ class LocationService {
     this.prisma = prisma;
   }
 
-  // Format location point for PostGIS
   private formatLocationPoint(latitude: number, longitude: number): string {
     return `POINT(${longitude} ${latitude})`;
   }
 
-  // Create venue with location - type-safe version
   async createVenueWithLocation(data: Prisma.VenueCreateInput) {
     return this.prisma.venue.create({
       data: {
@@ -21,7 +19,7 @@ class LocationService {
           data.latitude as number,
           data.longitude as number
         ),
-        // Ensure owner relation is correctly handled
+
         owner: {
           connect: { id: data.owner.connect?.id },
         },
@@ -29,7 +27,6 @@ class LocationService {
     });
   }
 
-  // Alternative method with unchecked input if needed
   async createVenueWithLocationUnchecked(
     data: Prisma.VenueUncheckedCreateInput
   ) {
@@ -48,19 +45,19 @@ class LocationService {
   async findNearbyVenues(
     latitude: number,
     longitude: number,
-    radiusInMeters: number = 5000
+    radiusInMeters: number = 10000
   ) {
     return this.prisma.$queryRaw`
       SELECT 
         *,
         ST_Distance(
           location::geography, 
-          ST_GeographyFromText('POINT(${longitude} ${latitude})')
+          ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)
         ) AS distance
       FROM "Venue"
       WHERE ST_DWithin(
         location::geography, 
-        ST_GeographyFromText('POINT(${longitude} ${latitude})'),
+        ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326),
         ${radiusInMeters}
       )
       ORDER BY distance
@@ -68,31 +65,6 @@ class LocationService {
   }
 }
 
-// Example usage
-async function exampleVenueCreation() {
-  const prisma = new PrismaClient();
-  const locationService = new LocationService(prisma);
 
-  try {
-    // Correct way to create a venue with owner
-    const newVenue = await locationService.createVenueWithLocation({
-      name: "Cool Bar",
-      type: "BAR",
-      latitude: 40.7128,
-      longitude: -74.006,
-      address: "123 Main St",
-      city: "New York",
-      country: "USA",
-      mapLink: "https://maps.example.com",
-      owner: {
-        connect: { id: "existing-user-id" },
-      },
-    });
-  } catch (error) {
-    console.error("Error creating venue:", error);
-  } finally {
-    await prisma.$disconnect();
-  }
-}
 
 export default LocationService;
