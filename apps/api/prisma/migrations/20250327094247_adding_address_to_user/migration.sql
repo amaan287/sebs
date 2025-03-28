@@ -1,43 +1,26 @@
-/*
-  Warnings:
-
-  - You are about to drop the column `Password` on the `User` table. All the data in the column will be lost.
-  - You are about to drop the `barlounge` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `cafe` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `club` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `rooftop` table. If the table is not empty, all the data it contains will be lost.
-  - Added the required column `password` to the `User` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `updatedAt` to the `User` table without a default value. This is not possible if the table is not empty.
-
-*/
 -- CreateEnum
 CREATE TYPE "VenueType" AS ENUM ('CAFE', 'BAR', 'CLUB', 'ROOFTOP');
 
 -- CreateEnum
 CREATE TYPE "MusicGenre" AS ENUM ('TECHNO', 'HOUSE', 'JAZZ', 'HIPHOP', 'ROCK', 'POP', 'CLASSICAL', 'OTHER');
 
--- DropIndex
-DROP INDEX "User_id_key";
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "firstName" TEXT NOT NULL,
+    "lastName" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "admin" BOOLEAN NOT NULL DEFAULT false,
+    "premium_user" BOOLEAN NOT NULL DEFAULT false,
+    "address" TEXT NOT NULL,
+    "latitute" DOUBLE PRECISION NOT NULL,
+    "longitude" DOUBLE PRECISION NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
--- AlterTable
-ALTER TABLE "User" DROP COLUMN "Password",
-ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "password" TEXT NOT NULL,
-ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL,
-ALTER COLUMN "admin" SET DEFAULT false,
-ALTER COLUMN "premium_user" SET DEFAULT false;
-
--- DropTable
-DROP TABLE "barlounge";
-
--- DropTable
-DROP TABLE "cafe";
-
--- DropTable
-DROP TABLE "club";
-
--- DropTable
-DROP TABLE "rooftop";
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Venue" (
@@ -71,11 +54,15 @@ CREATE TABLE "Event" (
     "date" TIMESTAMP(3) NOT NULL,
     "genre" "MusicGenre" NOT NULL,
     "venueId" TEXT NOT NULL,
+    "Performer" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Event_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- AddForeignKey
 ALTER TABLE "Venue" ADD CONSTRAINT "Venue_ownerId_fkey" FOREIGN KEY ("ownerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -1,7 +1,7 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
 import { configDotenv } from "dotenv";
-import authRoutes from "./routes/auth.route";
+import v1Routes from "./routes/index";
 
 configDotenv();
 
@@ -16,7 +16,7 @@ const port: number = 3000;
 app.use(express.json());
 
 //routes
-app.use("/api/v1", authRoutes);
+app.use("/api/v1", v1Routes);
 
 // Server setup
 app.listen(port, () => {
