@@ -77,8 +77,33 @@ class LocationService {
       ORDER BY distance
     `;
   }
+
+  async findNearbyEvents(latitude: number, longitude: number, radiusInMeters: number) {
+    return this.prisma.$queryRaw`
+      SELECT 
+        *,
+        ST_Distance(
+          location::geography, 
+          ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)
+        ) AS distance
+      FROM "Event"
+      WHERE ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326), ${radiusInMeters})
+      ORDER BY distance
+    `;
+  }
+  async findNearbyEventsByType(latitude: number, longitude: number, radiusInMeters: number, type: string) {
+    return this.prisma.$queryRaw`
+    SELECT 
+    *,
+    ST_Distance(
+      location::geography, 
+      ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)
+      ) AS distance
+    FROM "Event"
+    WHERE type = ${type} AND ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326), ${radiusInMeters})
+    ORDER BY distance
+    `;
+  }
+  
 }
-
-
-
-export default LocationService;
+  export default LocationService;

@@ -35,7 +35,7 @@ export const postVenueSchema = z.object({
   closingTime: z.date(),
   phoneNumber: z.string(),
   websiteUrl: z.string(),
-  image: z.string(),
+  image: z.array(z.string()),
   capacity: z.number(),
 });
 
@@ -52,7 +52,7 @@ export const venue = z.object({
   description: z.string().optional(),
   city: z.string(),
   country: z.string(),
-  image: z.string().optional(),
+  image: z.array(z.string()).optional(),
   websiteUrl: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().optional(),
@@ -89,7 +89,8 @@ export const eventSchema = z.object({
   venueId: z.string(),
 });
 
-export const postEventSchema = z.object({
+export const createEventSchema = z.object({
+  userId: z.string(),
   name: z.string(),
   date: z.date(),
   genre: z.enum([
@@ -102,8 +103,9 @@ export const postEventSchema = z.object({
     "CLASSICAL",
     "OTHER",
   ]),
-  venue: venue,
   venueId: z.string(),
+  venue: venue,
+  performer: z.array(z.string()),
 });
 
 export const findVenueSchema = z.object({
@@ -133,4 +135,11 @@ export const updateVenueSchema = z.object({
   image: z.array(z.string()).optional(),
   capacity: z.number().optional(),
   mapLink: z.string().optional(),
+});
+
+export const updateEventSchema = z.object({
+  name: z.string().optional(),
+  date: z.date().optional(),
+  genre: z.enum(["TECHNO", "HOUSE", "JAZZ", "HIPHOP", "ROCK", "POP", "CLASSICAL", "OTHER"]).optional(),
+  performer: z.array(z.string()).optional(),
 });

@@ -102,7 +102,7 @@ model Event {
   genre     MusicGenre
   venue     Venue      @relation(fields: [venueId], references: [id])
   venueId   String
-  Performer String
+  performer String
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
