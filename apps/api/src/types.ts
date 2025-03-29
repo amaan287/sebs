@@ -23,12 +23,20 @@ export const user = z.object({
 export const postVenueSchema = z.object({
   name: z.string(),
   type: z.enum(["CAFE", "BAR", "CLUB", "ROOFTOP"]),
+  description: z.string(),
   address: z.string(),
   latitude: z.number(),
   longitude: z.number(),
   ownerId: z.string(),
   city: z.string(),
   country: z.string(),
+  postalCode: z.string(),
+  openingTime: z.date(),
+  closingTime: z.date(),
+  phoneNumber: z.string(),
+  websiteUrl: z.string(),
+  image: z.string(),
+  capacity: z.number(),
 });
 
 export const venue = z.object({
@@ -37,9 +45,21 @@ export const venue = z.object({
   name: z.string(),
   type: z.enum(["CAFE", "BAR", "CLUB", "ROOFTOP"]),
   address: z.string(),
-  latitude: z.number(),
-  longitude: z.number(),
+  postalCode: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   ownerId: z.string(),
+  description: z.string().optional(),
+  city: z.string(),
+  country: z.string(),
+  image: z.string().optional(),
+  websiteUrl: z.string().optional(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
+  capacity: z.number().optional(),
+  isActive: z.boolean().default(true),
+  location: z.string().optional(),
+
 });
 // Favorite Schema
 export const favoriteSchema = z.object({
@@ -89,4 +109,28 @@ export const postEventSchema = z.object({
 export const findVenueSchema = z.object({
   latitude: z.number(),
   longitude: z.number(),
+  radius: z.number()
+});
+
+export const findVenueByTypeSchema = z.object({
+  type: z.enum(["CAFE", "BAR", "CLUB", "ROOFTOP"]),
+  latitude: z.number(),
+  longitude: z.number(),
+  radius: z.number()
+});
+
+export const updateVenueSchema = z.object({
+  name: z.string().optional(),
+  type: z.enum(["CAFE", "BAR", "CLUB", "ROOFTOP"]).optional(),
+  address: z.string().optional(),
+  description: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  websiteUrl: z.string().optional(),
+  postalCode: z.string().optional(),
+  openingTime: z.date().optional(),
+  closingTime: z.date().optional(),
+  isActive: z.boolean().optional(),
+  image: z.array(z.string()).optional(),
+  capacity: z.number().optional(),
+  mapLink: z.string().optional(),
 });

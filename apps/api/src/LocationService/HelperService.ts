@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient, Prisma, VenueType } from "@prisma/client";
 
 class LocationService {
   private prisma: PrismaClient;
@@ -45,7 +45,7 @@ class LocationService {
   async findNearbyVenues(
     latitude: number,
     longitude: number,
-    radiusInMeters: number = 10000
+    radiusInMeters: number,
   ) {
     return this.prisma.$queryRaw`
       SELECT 
@@ -60,6 +60,20 @@ class LocationService {
         ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326),
         ${radiusInMeters}
       )
+      ORDER BY distance
+    `;
+  }
+
+  async findNearbyVenueByType(type: VenueType, latitude: number, longitude: number, radiusInMeters: number,) {
+    return this.prisma.$queryRaw`
+      SELECT 
+        *,
+        ST_Distance(
+          location::geography, 
+          ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)
+        ) AS distance
+      FROM "Venue"
+      WHERE type = ${type} AND ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326), ${radiusInMeters})
       ORDER BY distance
     `;
   }

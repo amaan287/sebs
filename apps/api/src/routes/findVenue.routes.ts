@@ -1,8 +1,8 @@
 import express from "express";
-import { findVenue } from "../controllers/findVenue";
+import { findNearbyVenueByType, findVenue } from "../controllers/findVenue";
 
 const router = express.Router();
 
 router.post("/", findVenue);
-
+router.post("/byType", findNearbyVenueByType);
 export default router; 
